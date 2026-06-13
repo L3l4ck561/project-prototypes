@@ -1,0 +1,117 @@
+<!-- Stats Row -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+        <div class="flex justify-between">
+            <div>
+                <div class="text-sm text-slate-500">Total em Estoque</div>
+                <div class="text-4xl font-semibold mt-2 text-slate-800">2.847</div>
+                <div class="text-emerald-600 text-sm mt-1">↑ 4.2% esta semana</div>
+            </div>
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+                <i class="fa-solid fa-vial text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+        <div class="flex justify-between">
+            <div>
+                <div class="text-sm text-slate-500">Validades Próximas</div>
+                <div class="text-4xl font-semibold mt-2 text-amber-600">14</div>
+                <div class="text-amber-600 text-sm mt-1">em até 30 dias</div>
+            </div>
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
+                <i class="fa-solid fa-clock text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+        <div class="flex justify-between">
+            <div>
+                <div class="text-sm text-slate-500">Baixo Estoque</div>
+                <div class="text-4xl font-semibold mt-2 text-rose-600">7</div>
+                <div class="text-rose-600 text-sm mt-1">abaixo do mínimo</div>
+            </div>
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+        <div class="flex justify-between">
+            <div>
+                <div class="text-sm text-slate-500">Utilização Semanal</div>
+                <div class="text-4xl font-semibold mt-2 text-slate-800">68%</div>
+                <div class="text-emerald-600 text-sm mt-1">de capacidade</div>
+            </div>
+            <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center">
+                <i class="fa-solid fa-chart-pie text-2xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-12 gap-6">
+    <!-- Validades Próximas -->
+    <div class="col-span-5 bg-white border border-slate-200 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Validades Próximas</span>
+            </div>
+            <span class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-3xl">14 itens</span>
+        </div>
+        <div id="expiring-list" class="space-y-2 max-h-96 overflow-auto pr-2"></div>
+    </div>
+
+    <!-- Estoque por Fármaco -->
+    <div class="col-span-7 bg-white border border-slate-200 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="font-semibold">Estoque por Fármaco</div>
+            <div class="text-xs text-slate-500">Ordenado por criticidade</div>
+        </div>
+        <div id="stock-list" class="max-h-[420px] overflow-auto pr-2"></div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="col-span-7 bg-white border border-slate-200 rounded-3xl p-6">
+        <div class="flex justify-between mb-6">
+            <div class="font-semibold">Comparação Semanal</div>
+            <select id="chart-filter" onchange="updateCharts()"
+                class="bg-white border border-slate-200 rounded-2xl text-sm px-4 py-2 focus:border-cyan-400">
+                <option value="all">Todos os Fármacos</option>
+                <option value="pet">PET (F-18)</option>
+                <option value="spect">SPECT (Tc-99m)</option>
+            </select>
+        </div>
+        <div class="grid grid-cols-2 gap-8">
+            <div>
+                <div class="text-center text-sm text-slate-500 mb-3">Estoque Atual × Utilizado</div>
+                <div class="donut-container mx-auto" style="max-width: 220px;">
+                    <canvas id="donut-stock"></canvas>
+                </div>
+            </div>
+            <div>
+                <div class="text-center text-sm text-slate-500 mb-3">Distribuição por Tipo</div>
+                <div class="donut-container mx-auto" style="max-width: 220px;">
+                    <canvas id="donut-type"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movimentações -->
+    <div class="col-span-5 bg-white border border-slate-200 rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-bell"></i>
+                <span>Últimas Movimentações</span>
+            </div>
+            <button onclick="viewAllMovements()" class="text-cyan-600 text-sm hover:text-cyan-700">Ver
+                todas</button>
+        </div>
+        <div id="notifications-list" class="space-y-4 max-h-96 overflow-auto"></div>
+    </div>
+</div>

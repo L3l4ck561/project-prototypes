@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Meu App Dinâmico{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/output.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="tail-container bg-slate-50 text-slate-700 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <div class="w-72 bg-white border-r border-slate-200 flex flex-col">
+            <a href="/">
+                <div class="p-6 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 bg-cyan-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+                            ☢️</div>
+                        <div>
+                            <span class="logo-font text-2xl font-semibold tracking-tighter text-slate-800">NuCore</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Medicina Nuclear</p>
+                </div>
+            </a>
+            <div class="p-4 flex-1 overflow-y-auto">
+                <nav class="space-y-1">
+                    {% for page_name in page_list %}
+                    {% if page_name != 'itens'%}
+                    <a href="/{{ page_name }}" onclick="navigateTo('dashboard')"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ 'bg-cyan-50 text-cyan-700 font-medium' if page_name==page else 'hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors' }}">
+                        <span>{{ page_name.capitalize() }}</span>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </nav>
+            </div>
+            <div class="p-4 border-t border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-lg">
+                        👨‍⚕️</div>
+                    <div class="flex-1">
+                        <div class="font-medium text-slate-800">Dr. Carlos Mendes</div>
+                        <div class="text-xs text-slate-500">Físico Médico</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Preview Panel -->
+        <div id="preview-panel" class="w-96 bg-white border-l border-slate-200 hidden flex-col">
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="font-semibold text-slate-800">Detalhes do Lote</div>
+                <button onclick="closePreview()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto p-6" id="preview-content"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        class="hidden fixed bottom-6 right-6 bg-white border border-cyan-400 text-cyan-700 rounded-3xl px-6 py-4 flex items-center gap-3 shadow-xl z-50">
+        <i class="fa-solid fa-circle-check text-cyan-500"></i>
+        <span id="toast-text" class="text-sm font-medium"></span>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedStock • Dashboard</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+     <link rel="stylesheet" href="output.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+
+        :root {
+            --primary: 34 211 238;
+            /* cyan-500 */
+        }
+
+        .tail-container {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+
+        .logo-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+        }
+
+        .list-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .list-item:hover {
+            background-color: #f0f9ff;
+        }
+
+        .donut-container {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body class="tail-container bg-slate-50 text-slate-700 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-72 bg-white border-r border-slate-200 flex flex-col">
+            <div class="p-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-9 h-9 bg-cyan-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
+                        ☢️</div>
+                    <div>
+                        <span class="logo-font text-3xl font-semibold tracking-tighter text-slate-800">MedStock</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Medicina Nuclear</p>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto">
+                <nav class="space-y-1">
+                    <a href="#" onclick="navigateTo('dashboard')"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cyan-50 text-cyan-700 font-medium">
+                        <i class="fa-solid fa-chart-simple w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors">
+                        <i class="fa-solid fa-boxes-stacked w-5"></i>
+                        <span>Estoque Completo</span>
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors">
+                        <i class="fa-solid fa-calendar-day w-5"></i>
+                        <span>Validades</span>
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors">
+                        <i class="fa-solid fa-truck-ramp-box w-5"></i>
+                        <span>Movimentações</span>
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors">
+                        <i class="fa-solid fa-chart-pie w-5"></i>
+                        <span>Relatórios</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-lg">
+                        👨‍⚕️</div>
+                    <div class="flex-1">
+                        <div class="font-medium text-slate-800">Dr. Carlos Mendes</div>
+                        <div class="text-xs text-slate-500">Físico Médico</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between">
+                <div class="flex items-center gap-6 flex-1">
+                    <div class="relative flex-1 max-w-md">
+                        <input id="search-input" type="text" placeholder="Buscar fármaco ou lote..."
+                            onkeyup="filterItems()"
+                            class="w-full bg-slate-100 border border-slate-200 focus:border-cyan-400 rounded-3xl py-3 px-5 text-sm outline-none transition-all">
+                        <i class="fa-solid fa-magnifying-glass absolute right-5 top-3.5 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div onclick="toggleNotifications()" class="relative cursor-pointer">
+                        <i class="fa-solid fa-bell text-xl text-slate-500 hover:text-cyan-600 transition-colors"></i>
+                        <span id="notif-count"
+                            class="absolute -top-1 -right-1 bg-rose-500 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">7</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-slate-100 rounded-3xl px-4 py-2 text-sm">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span class="text-emerald-600 font-medium">Sistema Online</span>
+                    </div>
+
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-slate-700">07 Jun 2026</div>
+                        <div class="text-xs text-slate-500">18:13</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="flex-1 overflow-auto p-8 bg-slate-50">
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h1 class="text-4xl font-semibold tracking-tight text-slate-800">Dashboard de Estoque</h1>
+                        <p class="text-slate-500 mt-1">Medicina Nuclear • Laboratório Central</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="refreshDashboard()"
+                            class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 hover:border-slate-300 rounded-3xl text-sm font-medium transition-colors">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>Atualizar</span>
+                        </button>
+                        <button onclick="newEntry()"
+                            class="flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-3xl text-sm font-semibold transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Nova Entrada</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+                        <div class="flex justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500">Total em Estoque</div>
+                                <div class="text-4xl font-semibold mt-2 text-slate-800">2.847</div>
+                                <div class="text-emerald-600 text-sm mt-1">↑ 4.2% esta semana</div>
+                            </div>
+                            <div
+                                class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+                                <i class="fa-solid fa-vial text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+                        <div class="flex justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500">Validades Próximas</div>
+                                <div class="text-4xl font-semibold mt-2 text-amber-600">14</div>
+                                <div class="text-amber-600 text-sm mt-1">em até 30 dias</div>
+                            </div>
+                            <div
+                                class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
+                                <i class="fa-solid fa-clock text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+                        <div class="flex justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500">Baixo Estoque</div>
+                                <div class="text-4xl font-semibold mt-2 text-rose-600">7</div>
+                                <div class="text-rose-600 text-sm mt-1">abaixo do mínimo</div>
+                            </div>
+                            <div
+                                class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center">
+                                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 card-hover">
+                        <div class="flex justify-between">
+                            <div>
+                                <div class="text-sm text-slate-500">Utilização Semanal</div>
+                                <div class="text-4xl font-semibold mt-2 text-slate-800">68%</div>
+                                <div class="text-emerald-600 text-sm mt-1">de capacidade</div>
+                            </div>
+                            <div
+                                class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center">
+                                <i class="fa-solid fa-chart-pie text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- Validades Próximas -->
+                    <div class="col-span-5 bg-white border border-slate-200 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Validades Próximas</span>
+                            </div>
+                            <span class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-3xl">14 itens</span>
+                        </div>
+                        <div id="expiring-list" class="space-y-2 max-h-96 overflow-auto pr-2"></div>
+                    </div>
+
+                    <!-- Estoque por Fármaco -->
+                    <div class="col-span-7 bg-white border border-slate-200 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="font-semibold">Estoque por Fármaco</div>
+                            <div class="text-xs text-slate-500">Ordenado por criticidade</div>
+                        </div>
+                        <div id="stock-list" class="max-h-[420px] overflow-auto pr-2"></div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div class="col-span-7 bg-white border border-slate-200 rounded-3xl p-6">
+                        <div class="flex justify-between mb-6">
+                            <div class="font-semibold">Comparação Semanal</div>
+                            <select id="chart-filter" onchange="updateCharts()"
+                                class="bg-white border border-slate-200 rounded-2xl text-sm px-4 py-2 focus:border-cyan-400">
+                                <option value="all">Todos os Fármacos</option>
+                                <option value="pet">PET (F-18)</option>
+                                <option value="spect">SPECT (Tc-99m)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <div class="text-center text-sm text-slate-500 mb-3">Estoque Atual × Utilizado</div>
+                                <div class="donut-container mx-auto" style="max-width: 220px;">
+                                    <canvas id="donut-stock"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-center text-sm text-slate-500 mb-3">Distribuição por Tipo</div>
+                                <div class="donut-container mx-auto" style="max-width: 220px;">
+                                    <canvas id="donut-type"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movimentações -->
+                    <div class="col-span-5 bg-white border border-slate-200 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-bell"></i>
+                                <span>Últimas Movimentações</span>
+                            </div>
+                            <button onclick="viewAllMovements()" class="text-cyan-600 text-sm hover:text-cyan-700">Ver
+                                todas</button>
+                        </div>
+                        <div id="notifications-list" class="space-y-4 max-h-96 overflow-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div id="preview-panel" class="w-96 bg-white border-l border-slate-200 hidden flex-col">
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="font-semibold text-slate-800">Detalhes do Lote</div>
+                <button onclick="closePreview()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto p-6" id="preview-content"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" 
+     class="hidden fixed bottom-6 right-6 bg-white border border-cyan-400 text-cyan-700 rounded-3xl px-6 py-4 flex items-center gap-3 shadow-xl z-50">
+    <i class="fa-solid fa-circle-check text-cyan-500"></i>
+    <span id="toast-text" class="text-sm font-medium"></span>
+</div>
+
+    <script>
+        // Sample Data
+        let inventory = [
+            {
+                id: 1,
+                name: "Technetium-99m",
+                code: "TC-99M",
+                quantity: 1240,
+                unit: "mCi",
+                minStock: 800,
+                expiring: [
+                    { batch: "TC240512", expiry: "2026-06-12", qty: 320 },
+                    { batch: "TC240519", expiry: "2026-06-19", qty: 410 }
+                ],
+                usedWeek: 680,
+                type: "SPECT"
+            },
+            {
+                id: 2,
+                name: "Fluorine-18",
+                code: "F-18",
+                quantity: 680,
+                unit: "mCi",
+                minStock: 500,
+                expiring: [
+                    { batch: "F240603", expiry: "2026-06-09", qty: 180 }
+                ],
+                usedWeek: 920,
+                type: "PET"
+            },
+            {
+                id: 3,
+                name: "Iodine-131",
+                code: "I-131",
+                quantity: 450,
+                unit: "mCi",
+                minStock: 300,
+                expiring: [
+                    { batch: "I240528", expiry: "2026-07-15", qty: 450 }
+                ],
+                usedWeek: 120,
+                type: "SPECT"
+            },
+            {
+                id: 4,
+                name: "Gallium-68",
+                code: "GA-68",
+                quantity: 210,
+                unit: "mCi",
+                minStock: 300,
+                expiring: [
+                    { batch: "GA240605", expiry: "2026-06-11", qty: 210 }
+                ],
+                usedWeek: 340,
+                type: "PET"
+            }
+        ]
+
+        let notifications = [
+            {
+                time: "há 12 min",
+                action: "Saída",
+                item: "Technetium-99m",
+                qty: "-240 mCi",
+                batch: "TC240512"
+            },
+            {
+                time: "há 47 min",
+                action: "Entrada",
+                item: "Fluorine-18",
+                qty: "+400 mCi",
+                batch: "F240603"
+            },
+            {
+                time: "há 2h",
+                action: "Saída",
+                item: "Gallium-68",
+                qty: "-150 mCi",
+                batch: "GA240605"
+            }
+        ]
+
+        // Render Expiring Items
+        function renderExpiring() {
+            const container = document.getElementById('expiring-list')
+            container.innerHTML = ''
+
+            const sorted = [...inventory].sort((a, b) => {
+                const earliestA = a.expiring[0] ? new Date(a.expiring[0].expiry) : new Date(9999, 12, 31)
+                const earliestB = b.expiring[0] ? new Date(b.expiring[0].expiry) : new Date(9999, 12, 31)
+                return earliestA - earliestB
+            })
+
+            sorted.forEach(item => {
+                if (!item.expiring.length) return
+
+                const isUrgent = item.expiring[0].expiry <= '2026-06-15'
+
+                const div = document.createElement('div')
+                div.className = `list-item flex items-center gap-4 p-4 rounded-2xl cursor-pointer border border-transparent 
+                             ${isUrgent ? 'border-amber-300 bg-amber-50' : 'hover:bg-slate-50'}`
+                div.innerHTML = `
+                <div class="flex-1">
+                    <div class="font-medium text-slate-800">${item.name}</div>
+                    <div class="text-xs text-slate-500">${item.expiring[0].batch}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-medium ${isUrgent ? 'text-amber-600' : 'text-slate-700'}">
+                        ${item.expiring[0].qty} ${item.unit}
+                    </div>
+                    <div class="text-xs ${isUrgent ? 'text-amber-600' : 'text-slate-500'}">
+                        ${item.expiring[0].expiry}
+                    </div>
+                </div>
+            `
+                div.onclick = () => showPreview(item)
+                container.appendChild(div)
+            })
+        }
+
+        // Render Stock List
+        function renderStockList(filter = '') {
+            const container = document.getElementById('stock-list')
+            container.innerHTML = ''
+
+            const filtered = inventory.filter(item =>
+                item.name.toLowerCase().includes(filter.toLowerCase()) ||
+                item.code.toLowerCase().includes(filter.toLowerCase())
+            )
+
+            filtered.forEach(item => {
+                const isCritical = item.quantity <= item.minStock
+
+                const div = document.createElement('div')
+                div.className = `list-item flex items-center justify-between px-5 py-4 rounded-2xl cursor-pointer border-l-4 
+                             ${isCritical ? 'border-rose-400 bg-rose-50' : 'border-transparent hover:bg-slate-50'}`
+                div.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div>
+                        <div class="font-medium text-slate-800">${item.name}</div>
+                        <div class="text-xs text-slate-500">${item.code} • ${item.type}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-semibold ${isCritical ? 'text-rose-600' : 'text-slate-800'}">
+                        ${item.quantity}
+                    </div>
+                    <div class="text-xs text-slate-500">${item.unit}</div>
+                </div>
+            `
+                div.onclick = () => showPreview(item)
+                container.appendChild(div)
+            })
+        }
+
+        // Charts
+        let stockChart, typeChart
+
+        function createCharts() {
+            // Stock vs Used
+            const ctx1 = document.getElementById('donut-stock')
+            if (stockChart) stockChart.destroy()
+
+            stockChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Em Estoque', 'Utilizado na Semana'],
+                    datasets: [{
+                        data: [3120, 2060],
+                        backgroundColor: ['#22d3ee', '#f43f5e'],
+                        borderColor: '#ffffff',
+                        borderWidth: 6,
+                        cutout: '78%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ctx.raw + ' mCi'
+                            }
+                        }
+                    }
+                }
+            })
+
+            // Type distribution
+            const ctx2 = document.getElementById('donut-type')
+            if (typeChart) typeChart.destroy()
+
+            typeChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['SPECT', 'PET', 'Terapia'],
+                    datasets: [{
+                        data: [1690, 890, 540],
+                        backgroundColor: ['#67e8f9', '#14b8a6', '#a78bfa'],
+                        borderColor: '#ffffff',
+                        borderWidth: 6,
+                        cutout: '78%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#475569',
+                                usePointStyle: true,
+                                padding: 20,
+                                boxWidth: 8
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        function updateCharts() {
+            if (stockChart) {
+                stockChart.data.datasets[0].data = [
+                    Math.floor(Math.random() * 1500) + 2500,
+                    Math.floor(Math.random() * 1000) + 1500
+                ]
+                stockChart.update()
+            }
+        }
+
+        // Render Notifications
+        function renderNotifications() {
+            const container = document.getElementById('notifications-list')
+            container.innerHTML = ''
+
+            notifications.forEach(notif => {
+                const div = document.createElement('div')
+                div.className = 'flex gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 hover:bg-slate-100 transition-colors'
+                div.innerHTML = `
+                <div class="text-xs w-16 text-slate-500 pt-0.5">${notif.time}</div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 text-xs rounded-full 
+                            ${notif.action === 'Entrada'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-rose-100 text-rose-700'}">
+                            ${notif.action}
+                        </span>
+                        <span class="font-medium text-slate-800">${notif.item}</span>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-1">${notif.batch} • ${notif.qty}</div>
+                </div>
+            `
+                container.appendChild(div)
+            })
+        }
+
+        // Preview Panel
+        function showPreview(item) {
+            const panel = document.getElementById('preview-panel')
+            const content = document.getElementById('preview-content')
+
+            content.innerHTML = `
+            <div class="mb-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-3xl font-semibold text-slate-800">${item.name}</div>
+                        <div class="text-cyan-600 font-mono text-lg">${item.code}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-5xl font-bold text-slate-800">${item.quantity}</div>
+                        <div class="text-sm text-slate-500">${item.unit}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6 mb-6">
+                <div class="text-xs uppercase tracking-widest mb-4 text-slate-500">Lotes Ativos</div>
+                ${item.expiring.map(batch => `
+                    <div class="flex justify-between items-center py-4 border-b border-slate-200 last:border-none">
+                        <div>
+                            <div class="font-mono text-sm text-slate-700">${batch.batch}</div>
+                            <div class="text-xs text-slate-500">Vence em ${batch.expiry}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold text-slate-800">${batch.qty} ${item.unit}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-5">
+                    <div class="text-slate-500 text-xs">Utilizado esta semana</div>
+                    <div class="text-3xl font-semibold mt-1 text-slate-800">${item.usedWeek} ${item.unit}</div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-5">
+                    <div class="text-slate-500 text-xs">Estoque Mínimo</div>
+                    <div class="text-3xl font-semibold mt-1 text-slate-800">${item.minStock} ${item.unit}</div>
+                    ${item.quantity < item.minStock ?
+                    `<div class="text-rose-600 text-xs mt-2 flex items-center gap-1">
+                            <span>⚠️</span> Crítico
+                         </div>` : ''}
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-200 text-xs text-slate-500">
+                <div class="flex justify-between">
+                    <div>Última atualização:</div>
+                    <div class="font-mono">07/06/2026 17:45</div>
+                </div>
+            </div>
+        `
+
+            panel.classList.remove('hidden')
+            panel.classList.add('flex')
+        }
+
+        function closePreview() {
+            const panel = document.getElementById('preview-panel')
+            panel.classList.add('hidden')
+            panel.classList.remove('flex')
+        }
+
+        // Search
+        function filterItems() {
+            const term = document.getElementById('search-input').value
+            renderStockList(term)
+        }
+
+        // Toast
+        function showToast(message) {
+            let toast = document.getElementById('toast')
+            if (!toast) {
+                // Create toast if not exists
+                toast = document.createElement('div')
+                toast.id = 'toast'
+                toast.className = `hidden fixed bottom-6 right-6 bg-white border border-cyan-400 text-cyan-700 rounded-3xl px-6 py-4 flex items-center gap-3 shadow-xl`
+                toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span id="toast-text" class="text-sm"></span>`
+                document.body.appendChild(toast)
+            }
+            document.getElementById('toast-text').textContent = message
+            toast.classList.remove('hidden')
+            toast.style.transform = 'translateY(0)'
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(80px)'
+                setTimeout(() => toast.classList.add('hidden'), 300)
+            }, 2800)
+        }
+
+        // Fake actions
+        function newEntry() {
+            showToast('Nova entrada registrada com sucesso!')
+            setTimeout(() => {
+                inventory[0].quantity += 200
+                renderStockList(document.getElementById('search-input').value)
+            }, 800)
+        }
+
+        function refreshDashboard() {
+            showToast('Dashboard atualizado')
+            createCharts()
+        }
+
+        function toggleNotifications() {
+            showToast('Notificações abertas (demo)')
+        }
+
+        function viewAllMovements() {
+            showToast('Abrindo histórico completo...')
+        }
+
+        function navigateTo(page) {
+            showToast(`Navegando para ${page}... (demo)`)
+        }
+
+        // Initialize everything
+        function initializeDashboard() {
+            renderExpiring()
+            renderStockList()
+            renderNotifications()
+            createCharts()
+
+            // Demo notification pulse
+            setInterval(() => {
+                const countEl = document.getElementById('notif-count')
+                if (countEl) {
+                    countEl.style.transform = 'scale(1.3)'
+                    setTimeout(() => countEl.style.transform = 'scale(1)', 200)
+                }
+            }, 4000)
+
+            // Welcome toast
+            setTimeout(() => {
+                showToast('Bem-vindo de volta, Dr. Carlos!')
+            }, 1200)
+
+            console.log('%cMedStock Dashboard (Light Mode) carregado com sucesso ✅', 'color:#22d3ee; font-family:monospace')
+        }
+
+        window.onload = initializeDashboard
+    </script>
+</body>
+
+</html>

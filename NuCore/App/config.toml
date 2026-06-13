@@ -1,0 +1,15 @@
+[allowed_tables]
+itens = ["nome"]
+pharma = ["nome","cor"]
+
+[allowed_pages]
+Fármacos = "modules/estoque/index.html"
+itens = "modules/testes/itens.html"
+
+[allowed_subpages]
+Fármacos = [
+    {dashboard = 'modules/estoque/pages/dashboard.html'},
+    {saida = 'modules/estoque/pages/saida.html'},
+    {completo = 'modules/estoque/pages/completo.html'},
+    {entrada = 'modules/estoque/components/modal.html'}
+]
