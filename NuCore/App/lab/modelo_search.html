@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca Profissional</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #results {
+            margin-top: 10px;
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #ddd;
+        }
+
+        .highlight {
+            background-color: #fff3b8;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar por nome..." autocomplete="off">
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // ==================== DADOS DE EXEMPLO ====================
+        const lista = [
+            { id: 1, nome: "tést", cor: "#825619", ativo: 1, created_at: "Sun, 14 Jun 2026 22:27:59 GMT" },
+            { id: 2, nome: "João Silva", cor: "#1e88e5", ativo: 1 },
+            { id: 3, nome: "Maria Oliveira Santos", cor: "#43a047", ativo: 1 },
+            { id: 4, nome: "Pedro Henrique", cor: "#e53935", ativo: 0 },
+            { id: 5, nome: "Ana Clara Mendes", cor: "#8e24aa", ativo: 1 },
+            // ... adicione mais itens
+        ];
+
+        const resultsContainer = document.getElementById('results');
+        const searchInput = document.getElementById('searchInput');
+
+        // Função para remover acentos (melhor busca)
+        function removerAcentos(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        }
+
+        // Busca forte (estilo Google)
+        function buscarItens(termo) {
+            if (!termo.trim()) return lista;
+
+            const termoNormalizado = removerAcentos(termo);
+            const palavras = termoNormalizado.split(/\s+/).filter(p => p.length > 0);
+
+            return lista.filter(item => {
+                const nomeNormalizado = removerAcentos(item.nome);
+
+                // Busca por TODAS as palavras (AND)
+                return palavras.every(palavra =>
+                    nomeNormalizado.includes(palavra)
+                );
+            });
+        }
+
+        // Destacar termos encontrados
+        function destacarTexto(texto, termo) {
+            if (!termo.trim()) return texto;
+
+            const palavras = removerAcentos(termo).split(/\s+/);
+            let resultado = texto;
+
+            palavras.forEach(palavra => {
+                if (palavra.length < 1) return;
+                const regex = new RegExp(`(${palavra})`, 'gi');
+                resultado = resultado.replace(regex, '<span class="highlight">$1</span>');
+            });
+
+            return resultado;
+        }
+
+        // Renderizar resultados
+        function renderizarResultados(resultados, termo) {
+            resultsContainer.innerHTML = '';
+
+            if (resultados.length === 0) {
+                resultsContainer.innerHTML = `<p style="padding:20px; color:#666; text-align:center;">Nenhum resultado encontrado para "<strong>${termo}</strong>"</p>`;
+                return;
+            }
+
+            resultados.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+          <div class="color-dot" style="background-color: ${item.cor}"></div>
+          <div>
+            <strong>${destacarTexto(item.nome, termo)}</strong><br>
+            <small style="color:#666;">ID: ${item.id} • Ativo: ${item.ativo ? '✅' : '❌'}</small>
+          </div>
+        `;
+                resultsContainer.appendChild(div);
+            });
+        }
+
+        // Evento de busca com debounce
+        let timeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const termo = searchInput.value;
+                const resultados = buscarItens(termo);
+                renderizarResultados(resultados, termo);
+            }, 180); // debounce suave
+        });
+
+        // Renderiza todos no início
+        renderizarResultados(lista, '');
+    </script>
+</body>
+
+</html>

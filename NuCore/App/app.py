@@ -46,7 +46,7 @@ def favicon():
         mimetype='image/vnd.microsoft.icon'
     )
 
-# ====================== CRUD DINÂMICO (mantido) ======================
+# ====================== CRUD DINÂMICO ======================
 @app.route('/api/crud/<string:table>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def crud(table):
     if not is_table_allowed(table):
@@ -96,7 +96,62 @@ def crud(table):
         if not item_id: return jsonify({"error": "ID obrigatório"}), 400
         execute_query(f"DELETE FROM {table} WHERE {pk} = %s", (item_id,))
         return jsonify({"message": "Excluído com sucesso"}), 200
+    
+@app.route('/outs-pharma', methods=['GET','POST'])
+def outsPharma():
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
 
+        sql = """
+        INSERT INTO stock_outs (id_stock, usado, dt)
+        VALUES (%s, %s, %s)
+        """
+
+        values = [
+        (
+            lote["id"],
+            lote["usados"],
+            data["data"]
+        )
+        for lote in data["lotes"]
+        ]
+
+        execute_query(sql, values)
+        return jsonify({"message": "Baixa realizada com sucesso"}), 201
+
+    # Lista todos os fármacos + saldo
+    sql = """
+        SELECT p.cor, p.nome, SUM(s.qnt - COALESCE(o.usados, 0)) AS saldo
+        FROM pharma p
+        INNER JOIN stock s ON s.id_pharma = p.id
+        LEFT JOIN (
+            SELECT id_stock, SUM(usado) AS usados
+            FROM stock_outs
+            GROUP BY id_stock
+            ) o
+        ON o.id_stock = s.id
+        WHERE p.ativo = 1 AND s.ativo = 1 AND s.dt_prazo >= CURDATE()
+        GROUP BY p.id, p.nome
+        HAVING saldo > 0
+        ORDER BY p.nome;
+    """
+    resultsP = execute_query(sql, fetch="all")
+
+    # Lista todos os lotes e seus usos
+    sql = """
+        SELECT p.nome AS pharma, s.id AS id, s.lote AS lote,  s.dt_prazo AS validade, s.qnt AS qnt, s.qnt-COALESCE(SUM(o.usado), 0) AS inicial, s.qnt-COALESCE(SUM(o.usado), 0) AS disponivel, 0 AS usados
+        FROM stock s
+        INNER JOIN pharma p ON s.id_pharma = p.id
+        LEFT JOIN stock_outs o ON s.id = o.id_stock
+        WHERE s.ativo = 1 AND p.ativo = 1 AND s.dt_prazo >= CURDATE()
+        GROUP BY s.id
+        HAVING s.qnt - COALESCE(SUM(o.usado), 0) > 0
+        ORDER BY p.nome;
+    """
+    resultsS = execute_query(sql, fetch="all")
+
+
+    return jsonify({"pharma":resultsP,"stock":resultsS}), 200
 
 # ====================== ROTAS DE PÁGINAS ======================
 @app.route('/')
@@ -139,14 +194,5 @@ def status():
         "allowed_sub_pages": list(ALLOWED_SUBPAGES.keys())
     })
 
-# ===================================================================
-# PharmaStock
-# ===================================================================
-@app.route('/entrada-novo-farmaco', methods=['POST'])
-def pharma():
-
-    return jsonify({"message": "Excluído com sucesso"}), 200
-
-
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8800)

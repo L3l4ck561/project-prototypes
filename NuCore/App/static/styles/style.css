@@ -78,3 +78,8 @@
     background: rgb(34 211 238);
     border-radius: 2px;
 }
+
+.highlight {
+    background-color: rgba(34, 211, 238, 0.5);
+    font-weight: 600;
+}

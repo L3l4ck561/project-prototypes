@@ -13,12 +13,25 @@ def open_connection():
         port=3307,
     )
 
-def execute_query(sql, params=None, fetch=None, return_last_id=False):
+def execute_query(
+    sql,
+    params=None,
+    fetch=None,
+    return_last_id=False,
+    many=False
+):
     connection = open_connection()
     cursor = connection.cursor(dictionary=True)
 
     try:
-        cursor.execute(sql, params or ())
+        if (
+            isinstance(params, list)
+            and params
+            and isinstance(params[0], (list, tuple))
+        ):
+            cursor.executemany(sql, params)
+        else:
+            cursor.execute(sql, params or ())
 
         if fetch == "one":
             return cursor.fetchone()

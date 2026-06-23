@@ -1,15 +1,17 @@
 [allowed_tables]
 itens = ["nome"]
 pharma = ["nome","cor"]
+stock = ["id_pharma", "lote", "qnt", "dt_prazo", "dt_ent", "obs"]
+stock_outs = ["id_stock", "usado"]
 
 [allowed_pages]
-Fármacos = "modules/estoque/index.html"
+PharmaStock = "modules/estoque/index.html"
 itens = "modules/testes/itens.html"
 
 [allowed_subpages]
-Fármacos = [
+PharmaStock = [
     {dashboard = 'modules/estoque/pages/dashboard.html'},
-    {saida = 'modules/estoque/pages/saida.html'},
     {completo = 'modules/estoque/pages/completo.html'},
-    {entrada = 'modules/estoque/components/modal.html'}
+    {movimentacao = 'modules/estoque/pages/movimentacao.html'},
+    {controle = 'modules/estoque/pages/controle.html'}
 ]

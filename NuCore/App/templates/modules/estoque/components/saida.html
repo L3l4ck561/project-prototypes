@@ -1,0 +1,46 @@
+<form id="out-form" class="space-y-5" autocomplete="off">
+    <div>
+        <div class="flex items-center gap-3">
+            <!-- Color Picker -->
+            <div id="pharma-cor-out" class="w-11 h-11 rounded-xl border border-slate-400"></div>
+
+            <!-- Input Principal -->
+            <div class="flex-1 relative">
+                <input type="text" id="pharma-out" placeholder="Buscar por nome do fármaco..."
+                    class="bg-white w-full border border-slate-200 rounded-2xl px-5 py-3.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 outline-none text-base">
+            </div>
+
+            <button onclick="zerarTelaOut()" type="button"
+                class="w-10 h-10 rounded-2xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Mensagem auxiliar -->
+        <p id="pharma-exit-out" class="text-slate-500 text-sm min-h-[20px]" style="margin-left: 70px;"></p>
+
+        <!-- Lista de Sugestões -->
+        <ul id="list-pharma-out"
+            class="absolute z-50 mt-2 bg-white rounded-2xl border border-slate-200 shadow-xl max-h-60 overflow-y-auto hidden divide-y divide-slate-100">
+            <!-- Preenchido via JavaScript -->
+        </ul>
+    </div>
+</form>
+
+<div class="bg-white w-full rounded-3xl mb-4 overflow-hidden flex-1 flex flex-col">
+    <div id="preview-cards" class="flex overflow-x-auto gap-4 flex-1 h-full w-full p-2">
+        <!-- Cards serão inseridos aqui pela função -->
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-4 border-t border-slate-200">
+        <button class="px-5 py-3 border border-slate-200 rounded-2xl hover:bg-slate-50">
+            Cancelar
+        </button>
+        <button id="proceed-btn"
+            class="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl font-medium hidden">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            Prosseguir com a Baixa
+        </button>
+    </div>
+</div>

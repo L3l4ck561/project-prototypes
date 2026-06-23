@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manipulação DOM Dinâmica - Eventos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .preview {
+            min-height: 150px;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            margin: 15px 0;
+            background: #fafafa;
+        }
+
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔥 DOM Dinâmico com Múltiplos Eventos</h1>
+
+        <input type="text" id="meuInput" placeholder="Digite algo aqui...">
+
+        <div>
+            <strong>Preview:</strong>
+            <div id="preview" class="preview">O que você digitar aparecerá aqui...</div>
+        </div>
+
+        <div>
+            <strong>Log de Eventos:</strong>
+            <div id="log" class="log"></div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Adicionar Novos Comportamentos:</h3>
+            <button onclick="addEventExample('uppercase')">Forçar Maiúsculas</button>
+            <button onclick="addEventExample('count')">Contar Caracteres</button>
+            <button onclick="addEventExample('color')">Mudar Cor Aleatória</button>
+            <button onclick="addEventExample('emoji')">Adicionar Emoji</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ESTRUTURA BASE ====================
+        const input = document.getElementById('meuInput');
+        const preview = document.getElementById('preview');
+        const logElement = document.getElementById('log');
+
+        // Gerenciador de eventos (facilita adicionar vários comportamentos)
+        const eventHandlers = {
+            // Evento principal (padrão)
+            onInput: []
+        };
+
+        // Função para registrar log
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            logElement.innerHTML += `<div><small>[${timestamp}]</small> ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Função principal que executa todos os handlers
+        function handleInput(e) {
+            const value = e.target.value;
+
+            // Atualiza preview básico
+            preview.textContent = value || "O que você digitar aparecerá aqui...";
+
+            // Executa todos os handlers registrados
+            eventHandlers.onInput.forEach(handler => {
+                try {
+                    handler(value, e);
+                } catch (err) {
+                    console.error('Erro no handler:', err);
+                }
+            });
+        }
+
+        // ==================== REGISTRO DE EVENTOS ====================
+
+        // Adiciona o listener principal
+        input.addEventListener('input', handleInput);
+
+        // Exemplo: alguns handlers já registrados
+        eventHandlers.onInput.push((value) => {
+            if (value.length > 15) {
+                preview.style.borderColor = '#ff9800';
+                addLog('✅ Preview destacou por ser longo');
+            } else {
+                preview.style.borderColor = '#ccc';
+            }
+        });
+
+        // ==================== FUNÇÕES PARA ADICIONAR COMPORTAMENTOS ====================
+
+        function addEventExample(type) {
+            switch (type) {
+                case 'uppercase':
+                    eventHandlers.onInput.push((value) => {
+                        preview.style.textTransform = 'uppercase';
+                        addLog('🔠 Texto convertido para maiúsculas');
+                    });
+                    addLog('📌 Comportamento "Maiúsculas" adicionado!');
+                    break;
+
+                case 'count':
+                    const countDiv = document.createElement('div');
+                    countDiv.id = 'charCount';
+                    countDiv.style.marginTop = '10px';
+                    document.querySelector('.container').appendChild(countDiv);
+
+                    eventHandlers.onInput.push((value) => {
+                        document.getElementById('charCount').textContent =
+                            `Caracteres: ${value.length} | Palavras: ${value.trim().split(/\s+/).length}`;
+                    });
+                    addLog('📊 Contador de caracteres adicionado!');
+                    break;
+
+                case 'color':
+                    eventHandlers.onInput.push((value) => {
+                        if (value.length > 0) {
+                            const hue = (value.length * 20) % 360;
+                            preview.style.backgroundColor = `hsl(${hue}, 70%, 95%)`;
+                        }
+                    });
+                    addLog('🌈 Mudança de cor dinâmica adicionada!');
+                    break;
+
+                case 'emoji':
+                    eventHandlers.onInput.push((value) => {
+                        const emojis = ['🚀', '✨', '🔥', '💡', '🌟'];
+                        if (value.length % 5 === 0 && value.length > 0) {
+                            preview.textContent = value + ' ' + emojis[Math.floor(Math.random() * emojis.length)];
+                        }
+                    });
+                    addLog('😎 Emojis aleatórios adicionados!');
+                    break;
+            }
+        }
+
+        // ==================== EXEMPLOS ADICIONAIS ====================
+
+        // Você pode adicionar eventos em outros elementos também:
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                input.value = '';
+                input.dispatchEvent(new Event('input')); // Força o trigger
+                addLog('🔄 Input limpo com ESC');
+            }
+        });
+
+        // Dica: Para adicionar um novo handler depois:
+        // eventHandlers.onInput.push((value, event) => { ... });
+
+        addLog('🚀 Sistema de eventos dinâmico carregado!');
+    </script>
+</body>
+
+</html>

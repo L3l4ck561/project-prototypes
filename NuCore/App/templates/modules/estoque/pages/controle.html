@@ -1,0 +1,109 @@
+<div class="flex h-full flex-col overflow-hidden" id="main-contant">
+  <!-- Conteúdo -->
+  <div class="flex-1 overflow-hidden">
+
+    <div id="tela-saida" class="h-full flex flex-col">
+      {% include 'modules/estoque/components/saida.html' %}
+    </div>
+
+    <div id="tela-entrada" class="hidden">
+      {% include 'modules/estoque/components/entrada.html' %}
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="flex justify-center gap-3 p-4 border-t border-slate-200">
+    <div class="radio-input">
+      <label>
+        <input value="saida" name="value-radio" type="radio" checked />
+        <span>Saída</span>
+      </label>
+
+      <label>
+        <input value="entrada" name="value-radio" type="radio" />
+        <span>Entrada</span>
+      </label>
+
+      <span class="selection"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+{% include 'modules/estoque/components/modal_saida.html' %}
+
+<script src="{{ url_for('static', filename='scripts/estoque/saida.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/estoque/entrada.js') }}"></script>
+<script>
+  const pai = document.getElementById('main-contant');
+  let mouseSobreDiv = false;
+
+  function atualizarEstadoHover() {
+    mouseSobreDiv = pai.matches(':hover') &&
+      !document.querySelector('#tela-saida:hover') &&
+      !document.querySelector('#tela-entrada:hover');
+  }
+
+  // Escuta o movimento do mouse no container inteiro
+  pai.addEventListener('mousemove', atualizarEstadoHover);
+
+  // Garante que ao sair completamente, fica falso
+  pai.addEventListener('mouseleave', () => {
+    mouseSobreDiv = false;
+  });
+  // ==========================================================================
+  const radios = document.querySelectorAll('input[name="value-radio"]');
+
+  const telaSaida = document.getElementById('tela-saida');
+  const telaEntrada = document.getElementById('tela-entrada');
+
+  let telaAtual = 'saida';
+  let isCooldown = false;
+  const COOLDOWN_TIME = 800; // ms
+
+  function mostrarTela(tela) {
+    const radioSaida = document.querySelector('input[value="saida"]');
+    const radioEntrada = document.querySelector('input[value="entrada"]');
+
+    if (tela === 'saida') {
+      telaSaida.classList.remove('hidden');
+      telaEntrada.classList.add('hidden');
+      radioSaida.checked = true;
+    } else {
+      telaEntrada.classList.remove('hidden');
+      telaSaida.classList.add('hidden');
+      radioEntrada.checked = true;
+    }
+
+    telaAtual = tela;
+  }
+
+  // Navegação pelos radios
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      mostrarTela(radio.value);
+    });
+  });
+
+  // Navegação pelo scroll com cooldown
+  let ultimoScroll = 0;
+  const DELAY = 800;
+
+  window.addEventListener('wheel', (e) => {
+    if (!mouseSobreDiv) return;
+    const agora = Date.now();
+
+    if (agora - ultimoScroll < DELAY) return;
+
+    ultimoScroll = agora;
+
+    if (e.deltaY > 0 && telaAtual !== 'entrada') {
+      mostrarTela('entrada');
+    }
+
+    if (e.deltaY < 0 && telaAtual !== 'saida') {
+      mostrarTela('saida');
+    }
+  });
+</script>
