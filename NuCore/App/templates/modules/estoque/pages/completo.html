@@ -1,14 +1,86 @@
-<div class="bg-white rounded-3xl border border-slate-200 overflow-hidden">
+<div>
+    <div class="flex justify-between gap-6 pb-6 border-b border-slate-100">
+        <!-- Date Range -->
+        <div class="flex items-center justify-center">
+            <div class="rounded-lg">
+                <form id="periodo" class="flex">
+                    <div
+                        class="flex w-10 items-center justify-center rounded-tl-lg rounded-bl-lg border-r border-gray-200 bg-white p-5">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"
+                            class="pointer-events-none absolute w-5 fill-gray-500 transition">
+                            <path
+                                d="M16.72 17.78a.75.75 0 1 0 1.06-1.06l-1.06 1.06ZM9 14.5A5.5 5.5 0 0 1 3.5 9H2a7 7 0 0 0 7 7v-1.5ZM3.5 9A5.5 5.5 0 0 1 9 3.5V2a7 7 0 0 0-7 7h1.5ZM9 3.5A5.5 5.5 0 0 1 14.5 9H16a7 7 0 0 0-7-7v1.5Zm3.89 10.45 3.83 3.83 1.06-1.06-3.83-3.83-1.06 1.06ZM14.5 9a5.48 5.48 0 0 1-1.61 3.89l1.06 1.06A6.98 6.98 0 0 0 16 9h-1.5Zm-1.61 3.89A5.48 5.48 0 0 1 9 14.5V16a6.98 6.98 0 0 0 4.95-2.05l-1.06-1.06Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-x-4 px-2 ">
+                            De
+                            <!-- Data Inicial -->
+                            <div class="flex-1">
+                                <input type="date" id="dataDe"
+                                    class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-2.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 outline-none text-base transition-all">
+                            </div>
+                            até
+                            <!-- Data Final -->
+                            <div class="flex-1">
+                                <input type="date" id="dataAte"
+                                    class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-2.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 outline-none text-base transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="bg-blue-400 hover:bg-blue-300 p-2 rounded-tr-lg rounded-br-lg text-white font-semibold transition-colors">Buscar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-center">
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input class="sr-only peer" id="op-dt" value="" type="checkbox">
+                <div id="ativo"
+                    class="peer rounded-full outline-none duration-100 after:duration-500 w-38 h-10 bg-blue-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500  after:content-['Semanal'] after:absolute after:outline-none after:rounded-full after:h-8 after:w-22 after:bg-white after:top-1 after:left-1 after:flex after:justify-center after:items-center  after:text-sky-800 after:font-bold peer-checked:after:translate-x-14 peer-checked:after:content-['Atual'] peer-checked:after:border-white">
+                </div>
+            </label>
+
+            <!-- Botão de Exportar -->
+            <div class="ml-10 mr-10">
+                <button onclick="print()"
+                    class="group relative flex items-center gap-2 px-7 py-3.5 bg-black bg-opacity-90 hover:bg-opacity-80 text-white rounded-3xl font-medium transition-all active:scale-95 shadow-lg shadow-black/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="22" width="22">
+                        <path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                            d="M6 21H18M12 3V17M12 17L17 12M12 17L7 12" />
+                    </svg>
+
+                    <!-- Tooltip -->
+                    <div
+                        class="absolute opacity-0 -bottom-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-3 py-1.5 rounded-xl whitespace-nowrap transition-all group-hover:opacity-100 pointer-events-none">
+                        Exportar
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Mensagem auxiliar -->
+    <p id="pharma-exit-out" class="text-slate-500 text-sm mt-2 ml-1 min-h-[20px]">
+    </p>
+</div>
+
+<div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+    <div class="px-6 py-5 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-slate-800">Controle de Estoque</h2>
+    </div>
+
     <table class="w-full">
         <thead>
-            <tr class="border-b border-slate-100 bg-slate-50">
-                <th class="px-6 py-5 text-left text-xs font-medium text-slate-500">Fármaco</th>
-                <th class="px-6 py-5 text-left text-xs font-medium text-slate-500">Lote</th>
-                <th class="px-6 py-5 text-center text-xs font-medium text-slate-500">Quantidade</th>
-                <th class="px-6 py-5 text-center text-xs font-medium text-slate-500">Validade</th>
-                <th class="px-6 py-5 text-center text-xs font-medium text-slate-500">Dias Restantes</th>
-                <th class="px-6 py-5 text-center text-xs font-medium text-slate-500">Status</th>
-                <th class="px-6 py-5 w-12"></th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-600">Fármaco</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Em Estoque</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Usados</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Vencidos</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Recebidos</th>
+                <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Saldo</th>
             </tr>
         </thead>
         <tbody id="stock-table" class="divide-y divide-slate-100">

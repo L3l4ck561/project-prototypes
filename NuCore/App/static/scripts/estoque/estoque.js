@@ -1,85 +1,219 @@
-//* =========================================
-//* Variaveis Globais
-//* =========================================
-let pharma = [];
 let stock = [];
 
+const dtDe = document.getElementById('dataDe');
+const dtAte = document.getElementById('dataAte');
+const opDt = document.getElementById('op-dt');
+const ativoS = document.getElementById('ativo');
 
-//* =========================================
-//* Renderização
-//* =========================================
-
-let inventory = [
-    { id: 1, name: "Technetium-99m", code: "TC-99M", lote: "TC240512", qty: 1240, unit: "mCi", expiry: "2026-06-12", daysLeft: 5, status: "critical", type: "SPECT" },
-    { id: 2, name: "Fluorine-18", code: "F-18", lote: "F240603", qty: 680, unit: "mCi", expiry: "2026-06-09", daysLeft: 2, status: "critical", type: "PET" },
-    { id: 3, name: "Iodine-131", code: "I-131", lote: "I240528", qty: 450, unit: "mCi", expiry: "2026-07-15", daysLeft: 38, status: "normal", type: "SPECT" },
-    { id: 4, name: "Gallium-68", code: "GA-68", lote: "GA240605", qty: 210, unit: "mCi", expiry: "2026-06-11", daysLeft: 4, status: "critical", type: "PET" },
-    { id: 5, name: "Lutécio-177", code: "LU-177", lote: "LU240501", qty: 85, unit: "mCi", expiry: "2026-08-20", daysLeft: 74, status: "normal", type: "Terapia" },
-];
-
-function getStatusBadge(status) {
-    if (status === "critical") return `<span class="px-4 py-1 text-xs font-medium bg-rose-100 text-rose-700 rounded-3xl">Crítico</span>`;
-    if (status === "warning") return `<span class="px-4 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-3xl">Atenção</span>`;
-    return `<span class="px-4 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-3xl">Normal</span>`;
-}
-
-function renderTable(filtered = inventory) {
+function renderStockTable(stock) {
     const tbody = document.getElementById('stock-table');
-    tbody.innerHTML = '';
+    tbody.innerHTML = ''; // Limpa a tabela antes de renderizar
 
-    filtered.forEach(item => {
+    if (!stock || stock.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                    Nenhum medicamento encontrado
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    stock.forEach(item => {
+        // Converte Decimal (que geralmente vem como string ou número) para número
+        const estoque = Number(item.Estoque) || 0;
+        const usados = Number(item.Usados) || 0;
+        const vencidos = Number(item.Vencidos) || 0;
+        const recebidos = Number(item.Recebidos) || 0;
+        const saldo = Number(item.Saldo) || 0;
+
         const row = document.createElement('tr');
-        row.className = `table-row cursor-pointer ${item.daysLeft <= 7 ? 'bg-rose-50' : ''}`;
+        row.className = "hover:bg-slate-50 transition-colors";
+
         row.innerHTML = `
-                <td class="px-6 py-5 font-medium">${item.name}</td>
-                <td class="px-6 py-5 font-mono text-sm">${item.lote}</td>
-                <td class="px-6 py-5 text-slate-500">${item.code}</td>
-                <td class="px-6 py-5 text-center font-semibold">${item.qty} <span class="text-xs">${item.unit}</span></td>
-                <td class="px-6 py-5 text-center font-mono">${item.expiry}</td>
-                <td class="px-6 py-5 text-center">
-                    <span class="${item.daysLeft <= 7 ? 'text-rose-600 font-medium' : 'text-slate-600'}">${item.daysLeft} dias</span>
-                </td>
-                <td class="px-6 py-5 text-center">${getStatusBadge(item.status)}</td>
-                <td class="px-6 py-5 text-center">
-                    <i onclick="event.stopImmediatePropagation(); showPreview(${item.id});" class="fa-solid fa-eye text-cyan-500 hover:text-cyan-600"></i>
-                </td>
-            `;
-        row.onclick = () => showPreview(item.id);
+            <td class="px-6 py-4 font-medium text-slate-800">
+                ${item.Farmaco}
+            </td>
+            <td class="px-6 py-4 text-right text-slate-700">
+                ${estoque}
+            </td>
+            <td class="px-6 py-4 text-right text-rose-600 font-medium">
+                ${usados}
+            </td>
+            <td class="px-6 py-4 text-right text-amber-600 font-medium">
+                ${vencidos}
+            </td>
+            <td class="px-6 py-4 text-right text-emerald-600 font-medium">
+                ${recebidos}
+            </td>
+            <td class="px-6 py-4 text-right font-semibold ${saldo >= 0 ? 'text-emerald-700' : 'text-rose-700'}">
+                ${saldo}
+            </td>
+        `;
+
         tbody.appendChild(row);
     });
 }
 
-function filterTable() {
-    const term = document.getElementById('search-input').value.toLowerCase();
-    const statusFilter = document.getElementById('filter-status').value;
+async function validarPeriodo() {
+    // Só valida quando os dois campos estiverem preenchidos
+    if (!dtDe.value || !dtAte.value) return;
 
-    let filtered = inventory.filter(item =>
-        item.name.toLowerCase().includes(term) ||
-        item.lote.toLowerCase().includes(term) ||
-        item.code.toLowerCase().includes(term)
-    );
+    const inicio = new Date(dtDe.value);
+    const fim = new Date(dtAte.value);
 
-    if (statusFilter) {
-        filtered = filtered.filter(item => item.status === statusFilter);
+    if (inicio > fim) {
+        showToast("A data inicial não pode ser maior que a data final.", "info");
+        // Opcional: limpa o campo final
+        opDt.checked = false
+        return dtPSemanal()
     }
+    ativoS.classList.remove('bg-blue-300')
+    ativoS.classList.add('bg-gray-300')
 
-    renderTable(filtered);
+    await loadItens(dtDe.value, dtAte.value);
 }
+
+// Executa ao alterar qualquer uma das datas
+// dtDe.addEventListener('change', validarPeriodo);
+// dtAte.addEventListener('change', validarPeriodo);
+opDt.addEventListener('change', ()=>{
+    ativoS.classList.add('bg-blue-300')
+    ativoS.classList.remove('bg-gray-300')
+    if(opDt.checked){
+        dtPAtual();
+    }else{
+        dtPSemanal();
+    };
+});
+
+async function dtPSemanal() {
+    const hoje = new Date();
+
+    // getDay(): 0=domingo, 1=segunda, ..., 6=sábado
+    const diaSemana = hoje.getDay();
+
+    // Domingo da semana atual
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - diaSemana);
+
+    // Sábado da mesma semana
+    const sabado = new Date(domingo);
+    sabado.setDate(domingo.getDate() + 6);
+
+    // Formata para YYYY-MM-DD (aceito por input[type="date"])
+    const formatar = (data) => {
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    };
+
+    dtDe.value = formatar(domingo);
+    dtAte.value = formatar(sabado);
+    await loadItens(dtDe.value, dtAte.value);
+}
+async function dtPAtual() {
+    const hoje = new Date();
+
+    // getDay(): 0=domingo, 1=segunda, ..., 6=sábado
+    const diaSemana = hoje.getDay();
+
+    // Domingo da semana atual
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - diaSemana);
+
+    // Formata para YYYY-MM-DD (aceito por input[type="date"])
+    const formatar = (data) => {
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    };
+
+    dtDe.value = formatar(domingo);
+    dtAte.valueAsDate = hoje;
+    await loadItens(dtDe.value, dtAte.value);
+}
+
+function ordenarPorCriticidade(lista) {
+    return [...lista].sort((a, b) => {
+        const score = (item) => {
+            const estoque = Number(item.Estoque);
+            const recebidos = Number(item.Recebidos);
+            const usados = Number(item.Usados);
+            const vencidos = Number(item.Vencidos);
+            const saldo = Number(item.Saldo);
+
+            // Item sem movimentação nenhuma
+            const semMovimento =
+                estoque === 0 &&
+                recebidos === 0 &&
+                usados === 0 &&
+                vencidos === 0 &&
+                saldo === 0;
+
+            if (semMovimento) {
+                return -999999; // vai para o final
+            }
+
+            // Criticidade:
+            // + saldo baixo
+            // + muito uso
+            // + muitos vencidos
+            return (
+                usados * 10 +
+                vencidos * 20 -
+                saldo * 5
+            );
+        };
+
+        return score(b) - score(a); // maior score primeiro
+    });
+}
+//* =========================================
+//* Form Submit - SAÍDA
+//* =========================================
+document.getElementById('periodo').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    validarPeriodo();
+});
 
 //* =========================================
 //* Inicialização
 //* =========================================
 
-async function loadItens() {
-    const resultP = await crudOperation('GET', 'pharma');
-    const resultS = await crudOperation('GET', 'stock');
-    if (resultP && resultS) {
-        pharma = resultP;
-        stock = resultS
+async function loadItens(dataInicio, dataFim) {
+    try {
+        const response = await fetch('/pharmastock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data_inicio: dataInicio,
+                data_fim: dataFim
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (!result) return;
+        
+        stock = ordenarPorCriticidade(result)
+
+        renderStockTable(stock);
+    } catch (erro) {
+        console.error('Erro na requisição:', erro);
     }
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadItens();
-    renderTable();
+    dtPSemanal()
 });

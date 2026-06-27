@@ -1,8 +1,13 @@
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, jsonify, request, render_template, send_from_directory, redirect, url_for, make_response, session, flash
 import toml
 from resources.database_connection import execute_query
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
 
 # ==================== CONFIG ====================
 config = toml.load('config.toml')
@@ -150,8 +155,24 @@ def outsPharma():
     """
     resultsS = execute_query(sql, fetch="all")
 
-
     return jsonify({"pharma":resultsP,"stock":resultsS}), 200
+
+@app.route('/pharmastock', methods=['POST'])
+def opharmastock():
+    data = request.get_json()
+
+    data_inicio = data.get('data_inicio')
+    data_fim = data.get('data_fim')
+
+    resultado = execute_query(
+        sql="sp_estoque_cronologico",
+        params=[data_inicio, data_fim],
+        fetch="all",
+        is_procedure=True
+    )
+    print(resultado)
+
+    return jsonify(resultado), 200
 
 # ====================== ROTAS DE PÁGINAS ======================
 @app.route('/')

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuários do Sistema{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/controle.css') }}">
+<!-- Header -->
+<header class="h-16 border-slate-200 px-8 flex items-center justify-center">
+    <nav class="flex items-center gap-8 text-sm font-medium">
+        <!-- Menu Links -->
+        {% for sub_page in subpage_list %}
+        <a href="/{{page}}/{{sub_page.keys() | list | first}}"
+            class="nav-link flex items-center gap-x-2 {{'text-cyan-600 font-semibold' if subpage == sub_page.keys() | list | first else 'text-slate-600 hover:text-cyan-600 transition-colors'}}">
+            {% if sub_page.keys() | list | first == 'users' %}
+            <i class="fa-solid fa-user"></i>
+            <span>Usuários Ativos</span>
+            {% elif sub_page.keys() | list | first == 'cadastro' %}
+            <i class="fa-solid fa-arrow-right-arrow-left" style="margin-right: 5px;"></i>
+            <span>Cadastrar</span>
+            {% endif %}
+            <!-- <span>{{sub_page.keys() | list | first}}</span> -->
+        </a>
+        {% endfor %}
+    </nav>
+</header>
+
+<!-- Main content -->
+<div class="flex-1 overflow-auto p-4 bg-slate-50">
+    {% for sub_page in subpage_list %}
+    {% if subpage == sub_page.keys() | list | first %}
+
+    {% include sub_page[subpage] %}
+
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}

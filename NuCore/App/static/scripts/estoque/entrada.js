@@ -286,6 +286,7 @@ async function salvarFarmaco() {
 
                 const result_stock = await crudOperation('POST', 'stock', data_stock);
                 showToast(`Lote ${doisitens ? ' + Fármaco' : ''} cadastrado com sucesso!`)
+                zerarTelaOut()
                 await loadItensOut();
             }
 

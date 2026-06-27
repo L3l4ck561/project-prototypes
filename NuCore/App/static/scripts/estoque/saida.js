@@ -86,14 +86,6 @@ function renderizarResultadosOut(resultados, termo) {
     });
 }
 
-farmacoOut.addEventListener('blur', () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-        farmacoListaOut.classList.add('hidden');
-    }, 180);
-})
-
-
 //* =========================================
 //* Seleção e Edição - SAÍDA
 //* =========================================
@@ -116,8 +108,11 @@ window.pharmaSelectOut = function (nome) {
 };
 
 farmacoOut.addEventListener('blur', () => {
-    clearTimeout(timeoutOut);
-});
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        farmacoListaOut.classList.add('hidden');
+    }, 180);
+})
 
 //* =========================================
 //* Handler Principal - SAÍDA
@@ -159,7 +154,6 @@ function openStockModal(farmacoName, lots = null) {
 
     renderLotsOut();
     document.getElementById('stockModal').classList.remove('hidden');
-    document.getElementById('use-date').valueAsDate = new Date();
 }
 
 function renderLotsOut() {
@@ -231,10 +225,10 @@ async function confirmUsage() {
             showToast("Por favor, informe a data de uso.", "warning");
             return;
         }
-        console.log("Saída confirmada:", {
-            data: date,
-            lotes: currentLotsOut.filter(l => l.usados > 0)
-        });
+        // console.log("Saída confirmada:", {
+        //     data: date,
+        //     lotes: stockOut.filter(l => l.usados > 0)
+        // });
 
         const response = await fetch(
             '/outs-pharma',
@@ -245,14 +239,15 @@ async function confirmUsage() {
                 },
                 body: JSON.stringify({
                     data: date,
-                    lotes: currentLotsOut.filter(l => l.usados > 0)
+                    lotes: stockOut.filter(l => l.usados > 0)
                 })
             }
         );
 
         showToast("Saída registrada com sucesso!", 'success');
         closeModal();
-        loadItensOut();
+        await loadItensOut();
+        renderStockOutPreview(stockOut, '#preview-cards');
         clearTimeout(timeoutOut);
         timeoutOut = setTimeout(() => {
             if (!encontrarFarmacoOut(farmacoOut.value.trim())) zerarTelaOut();
@@ -267,69 +262,10 @@ function closeModal() {
     document.getElementById('stockModal').classList.add('hidden');
 }
 
-//* =========================================
-//* Form Submit - SAÍDA
-//* =========================================
-document.getElementById('out-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    let item = encontrarFarmacoOut(farmacoOut.value.trim());
-    if (!item) return;
-
-    let resultLot = stockOut.filter(x => x.pharma === item.nome);
-
-    await openStockModal(item, resultLot);
-});
 
 //* =========================================
-//* Funções Auxiliares - SAÍDA
+//* Preview dos usos
 //* =========================================
-
-function resetUIOut() {
-    farmacoCorOut.style.backgroundColor = '#ffffff';
-    itemSelecionadoOut = null;
-    farmacoListaOut.classList.add('hidden');
-    msgPOut.textContent = '';
-}
-
-function zerarTelaOut() {
-    resetUIOut();
-    farmacoOut.value = '';
-    farmacoCorOut.style.backgroundColor = '#ffffff';
-}
-
-//* =========================================
-//* Inicialização - SAÍDA
-//* =========================================
-
-async function loadItensOut() {
-    try {
-        const response = await fetch('/outs-pharma');
-
-        if (!response.ok) {
-            showToast(`Erro: ${response.status}`, 'error');
-            return;
-        }
-
-        const result = await response.json();
-
-        if (result) {
-            pharmaOut = result.pharma;
-            stockOut = result.stock;
-        }
-        console.log(stockOut)
-    } catch (erro) {
-        showToast('Erro de conexão com o servidor', 'error');
-        console.error('Erro na requisição:', erro);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadItensOut();
-    farmacoOut.addEventListener('input', handleInputOut);
-});
-
-//! =========================================================================================================
 //renderStockOutPreview(stockOut, '#preview-cards');
 function renderStockOutPreview(stockOut, containerSelector = '.preview-container') {
     const container = document.querySelector(containerSelector);
@@ -411,7 +347,7 @@ function createPharmaCard(pharma, items) {
     }
     card.innerHTML = `
         <!-- Header -->
-        <div class="mb-4" onclick=" abrirmodal('${pharma}')">
+        <div class="mb-4">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 text-cyan-600 rounded-2xl flex items-center justify-center font-bold" style="background-color:${itemPharma.cor}"></div>
                 <div>
@@ -425,18 +361,18 @@ function createPharmaCard(pharma, items) {
         <div class="bg-slate-50 rounded-2xl p-3 mb-4">
             <div class="flex justify-between items-baseline">
                 <span class="text-slate-600 text-sm">Total Disponível:</span>
-                <span class="text-2xl font-bold">${itemPharma.saldo}</span>
+                <span class="text-2xl font-bold">${itemPharma.saldo} Un</span>
             </div>
 
             <div class="flex justify-between items-baseline">
                 <span class="text-slate-600 text-sm">Total utilizado:</span>
-                <span class="text-2xl font-bold text-emerald-600">${totalUsed}</span>
+                <span class="text-2xl font-bold text-emerald-600">${totalUsed} Un</span>
             </div>
 
             <div class="flex justify-between items-baseline">
                 <span class="text-slate-600 text-sm">Sub Total:</span>
                 <span class="text-2xl font-bold ${subtotalColor}">
-                    ${subtotal}
+                    ${subtotal} Un
                 </span>
             </div>
         </div>
@@ -445,6 +381,7 @@ function createPharmaCard(pharma, items) {
         <div class="flex-1 overflow-auto">
             ${lotsHTML}
         </div>
+        <span class="text-blue-600 cursor-pointer hover:text-blue-800 text-end" onclick="abrirmodal('${pharma}')">Editar</span>
     `;
 
     return card;
@@ -455,3 +392,68 @@ function abrirmodal(pharma) {
     let resultLot = stockOut.filter(x => x.pharma === item.nome);
     openStockModal(item, resultLot);
 }
+
+//* =========================================
+//* Form Submit - SAÍDA
+//* =========================================
+document.getElementById('out-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    let item = encontrarFarmacoOut(farmacoOut.value.trim());
+    if (!item) return;
+
+    let resultLot = stockOut.filter(x => x.pharma === item.nome);
+
+    await openStockModal(item, resultLot);
+});
+
+//* =========================================
+//* Funções Auxiliares - SAÍDA
+//* =========================================
+
+function resetUIOut() {
+    farmacoCorOut.style.backgroundColor = '#ffffff';
+    itemSelecionadoOut = null;
+    farmacoListaOut.classList.add('hidden');
+    farmacoOut.value = '';
+    msgPOut.textContent = '';
+}
+
+function zerarTelaOut() {
+    resetUIOut();
+    stockOut.forEach(item => {
+        item.usados = 0;
+    });
+    renderStockOutPreview(stockOut, '#preview-cards');
+}
+
+//* =========================================
+//* Inicialização - SAÍDA
+//* =========================================
+
+async function loadItensOut() {
+    try {
+        const response = await fetch('/outs-pharma');
+
+        if (!response.ok) {
+            showToast(`Erro: ${response.status}`, 'error');
+            return;
+        }
+
+        const result = await response.json();
+
+        if (result) {
+            pharmaOut = result.pharma;
+            stockOut = result.stock;
+        }
+    } catch (erro) {
+        showToast('Erro de conexão com o servidor', 'error');
+        console.error('Erro na requisição:', erro);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadItensOut();
+    document.getElementById('use-date').valueAsDate = new Date();
+    farmacoOut.addEventListener('input', handleInputOut);
+});

@@ -6,7 +6,7 @@ stock_outs = ["id_stock", "usado"]
 
 [allowed_pages]
 PharmaStock = "modules/estoque/index.html"
-itens = "modules/testes/itens.html"
+Pessoas = "modules/Pessoas/index.html"
 
 [allowed_subpages]
 PharmaStock = [
@@ -14,4 +14,8 @@ PharmaStock = [
     {completo = 'modules/estoque/pages/completo.html'},
     {movimentacao = 'modules/estoque/pages/movimentacao.html'},
     {controle = 'modules/estoque/pages/controle.html'}
+]
+Pessoas = [
+    {users = 'modules/Pessoas/pages/users.html'},
+    {cadastro = 'modules/Pessoas/pages/cadastro.html'},
 ]

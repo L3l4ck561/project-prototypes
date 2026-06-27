@@ -10,7 +10,7 @@
                     class="bg-white w-full border border-slate-200 rounded-2xl px-5 py-3.5 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 outline-none text-base">
             </div>
 
-            <button onclick="zerarTelaOut()" type="button"
+            <button onclick="resetUIOut()" type="button"
                 class="w-10 h-10 rounded-2xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -33,12 +33,18 @@
     </div>
 
     <!-- Footer -->
-    <div class="flex justify-end gap-3 p-4 border-t border-slate-200">
-        <button class="px-5 py-3 border border-slate-200 rounded-2xl hover:bg-slate-50">
+    <div class="flex gap-3 p-4 border-t border-slate-200 items-center">
+        <div class="flex-1">
+            <div class="w-50">
+                <label class="block text-xs text-gray-500 mb-1">Data de Uso</label>
+                <input type="date" id="use-date"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-cyan-500">
+            </div>
+        </div>
+        <button onclick="zerarTelaOut()" class="px-5 h-10 border border-slate-200 rounded-2xl hover:bg-slate-50">
             Cancelar
         </button>
-        <button id="proceed-btn"
-            class="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl font-medium hidden">
+        <button onclick="confirmUsage()" class="proceed-btn hidden px-6 h-10 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl font-medium">
             <i class="fa-solid fa-arrow-right-arrow-left"></i>
             Prosseguir com a Baixa
         </button>
