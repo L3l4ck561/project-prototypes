@@ -1,1 +1,23 @@
-cadastro
+<!-- From Uiverse.io by themrsami -->
+<div class="flex flex-col items-center justify-center h-full pb-16">
+  <div class="w-full max-w-[50vw] bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Cadastrar Nova Pessoa</h2>
+
+    <form class="flex flex-col" id="form-logup" autocomplete="off">
+      <input type="text" id="user-name" value="carlos gabriel dos santos araújo"
+        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+        placeholder="Nome Completo">
+      <input type="number" id="user-cpf" value="44985696870"
+        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+        maxlength="11" placeholder="CPF">
+      <input type="text" id="user-cargo" value="supervisor"
+        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+        placeholder="Cargo">
+
+      <button type="submit"
+        class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Salvar</button>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/pessoas/logup.js') }}"></script>

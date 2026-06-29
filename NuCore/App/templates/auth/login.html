@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Login{% endblock %}</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles/output.css') }}"> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="tail-container bg-slate-50 text-slate-700 min-h-screen">
+    <!-- From Uiverse.io by themrsami -->
+    <div class="flex flex-col items-center justify-center h-screen">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Login</h2>
+            <form class="flex flex-col" action="/auth" autocomplete="off" method="post">
+                <input type="text" name="user" value="L3l4ck561"
+                    class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                    placeholder="Usuário">
+                <input type="password" name="password" value="@DevAdmin_561"
+                    class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                    placeholder="Senha">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for msg, tipo in messages %}
+                {% if tipo=='login' %}
+                <div style="color:red;text-align: center;margin-top: 10px;">{{ msg }}</div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <button type="submit"
+                    class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('dragstart', () => {
+            console.log('dragstart');
+        });
+
+        document.addEventListener('dragend', () => {
+            console.log('dragend');
+        });
+
+        document.addEventListener('drop', () => {
+            console.log('drop');
+        });
+    </script>
+</body>
+
+</html>

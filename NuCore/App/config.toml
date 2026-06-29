@@ -4,6 +4,8 @@ pharma = ["nome","cor"]
 stock = ["id_pharma", "lote", "qnt", "dt_prazo", "dt_ent", "obs"]
 stock_outs = ["id_stock", "usado"]
 
+usuario = ["nome", "nome_completo", "cargo", "cpf"]
+
 [allowed_pages]
 PharmaStock = "modules/estoque/index.html"
 Pessoas = "modules/Pessoas/index.html"
@@ -15,7 +17,12 @@ PharmaStock = [
     {movimentacao = 'modules/estoque/pages/movimentacao.html'},
     {controle = 'modules/estoque/pages/controle.html'}
 ]
+
 Pessoas = [
     {users = 'modules/Pessoas/pages/users.html'},
     {cadastro = 'modules/Pessoas/pages/cadastro.html'},
+    {access = 'modules/Pessoas/pages/access.html'},
 ]
+
+[allowed_access_key]
+cadastro = ["supervisor"]

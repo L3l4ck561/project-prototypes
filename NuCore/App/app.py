@@ -1,4 +1,6 @@
 from flask import Flask, jsonify, request, render_template, send_from_directory, redirect, url_for, make_response, session, flash
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 import toml
 from resources.database_connection import execute_query
 from dotenv import load_dotenv
@@ -15,6 +17,10 @@ config = toml.load('config.toml')
 ALLOWED_TABLES = config.get('allowed_tables', {})
 ALLOWED_PAGES = config.get('allowed_pages', {})
 ALLOWED_SUBPAGES = config.get('allowed_subpages', {})
+ALLOWED_ACCESS_KEY = config.get('allowed_access_key', {})
+for key in ALLOWED_ACCESS_KEY.values():
+    if os.getenv("USER_CARGO") not in key:
+        key.append(os.getenv("USER_CARGO"))
 
 def is_table_allowed(table_name: str) -> bool:
     return table_name in ALLOWED_TABLES
@@ -34,13 +40,84 @@ def is_sub_page_allowed(sub_page: str) -> bool:
 def get_template_subpage(sub_page: str):
     return ALLOWED_SUBPAGES.get(sub_page, [])
 
+# ====================== Decorator para proteger rotas ======================
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'usuario' not in session:
+            flash(["Faça login primeiro!",'login'])
+            return redirect(url_for('auth'))
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/auth", methods=["GET", "POST"])
+def auth():
+    if "usuario" in session:
+        return redirect(url_for("home"))
+
+    try:
+        if request.method == "POST":
+            nome = request.form['user']
+            senha = request.form['password']
+        
+            usuario = execute_query(f'SELECT id, nome, senha, cargo FROM usuario WHERE ativo=1 AND nome="{nome}";', fetch="one")
+            if usuario and check_password_hash(usuario['senha'], senha):
+                session.permanent = True
+
+                session['usuario'] = {
+                    'id': usuario['id'],
+                    'name': usuario['nome'],
+                    'cargo': usuario['cargo']
+                }
+
+                resp = make_response(redirect(url_for("home")))
+                return resp
+
+            if senha == os.getenv("USER_PASSWORD") and nome == os.getenv("NAME_USER") and not execute_query(f'SELECT nome FROM usuario WHERE id = 1 AND nome = "{os.getenv("NAME_USER")}";', fetch="one"):
+                hashed_password = generate_password_hash(os.getenv("USER_PASSWORD"))
+                values = [os.getenv("NAME_USER"), hashed_password, os.getenv("USER_CARGO")]
+                sql = "INSERT INTO usuario (nome, cpf, senha, cargo) VALUES (%s, '444.444.444-44', %s, %s)"
+                execute_query(sql, values, return_last_id=False)
+
+            flash([f"Usuário ou senha incorretos.",'login'])    
+            return redirect(url_for('auth'))
+    except Exception as e:
+        flash([f"Ocorreu um erro interno no servidor.",'login']) 
+        print(f"Ocorreu um erro: {e}")
+
+    return render_template("auth/login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    session.clear()
+    resp = make_response(redirect(url_for("auth")))
+    flash(["Você saiu.",'login'])
+    return resp
+
+@app.route('/logup', methods=['POST','GET'])
+@login_required
+def logup():
+    if not session.get('usuario')['cargo'] in ALLOWED_ACCESS_KEY['cadastro']:
+        return "Acesso Negado", 403
+
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        result = execute_query(f"SELECT * FROM {table} WHERE {pk} = %s", (item_id,), fetch="one")
+        print(data)
+
+    return jsonify(session.get('usuario')), 200
+
 # ====================== CONTEXTO GLOBAL (para todos os templates) ======================
 @app.context_processor
 def inject_global_context():
     """Disponibiliza variáveis em TODOS os templates automaticamente"""
+
     return {
         'allowed_pages': ALLOWED_PAGES,           # dict completo
         'page_list': list(ALLOWED_PAGES.keys()),   # lista só com os nomes
+        'user': session.get('usuario'),
+        'key': ALLOWED_ACCESS_KEY,
     }
 
 @app.route('/favicon.ico')
@@ -53,6 +130,7 @@ def favicon():
 
 # ====================== CRUD DINÂMICO ======================
 @app.route('/api/crud/<string:table>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@login_required
 def crud(table):
     if not is_table_allowed(table):
         return jsonify({"error": f"Tabela '{table}' não permitida"}), 403
@@ -103,6 +181,7 @@ def crud(table):
         return jsonify({"message": "Excluído com sucesso"}), 200
     
 @app.route('/outs-pharma', methods=['GET','POST'])
+@login_required
 def outsPharma():
     if request.method == 'POST':
         data = request.get_json(silent=True) or {}
@@ -158,6 +237,7 @@ def outsPharma():
     return jsonify({"pharma":resultsP,"stock":resultsS}), 200
 
 @app.route('/pharmastock', methods=['POST'])
+@login_required
 def opharmastock():
     data = request.get_json()
 
@@ -170,17 +250,18 @@ def opharmastock():
         fetch="all",
         is_procedure=True
     )
-    print(resultado)
 
     return jsonify(resultado), 200
 
 # ====================== ROTAS DE PÁGINAS ======================
 @app.route('/')
+@login_required
 def home():
     return render_template('index.html', page='home')
 
 @app.route("/<page_name>/<sub_page>")
 @app.route('/<page_name>')
+@login_required
 def user_page(page_name, sub_page=None):
     if not is_page_allowed(page_name):
         return "Página não permitida", 403
@@ -207,12 +288,14 @@ def user_page(page_name, sub_page=None):
 
 # ====================== HEALTH ======================
 @app.route('/status')
+@login_required
 def status():
     return jsonify({
         "status": "online",
         "allowed_tables": list(ALLOWED_TABLES.keys()),
         "allowed_pages": list(ALLOWED_PAGES.keys()),
-        "allowed_sub_pages": list(ALLOWED_SUBPAGES.keys())
+        "allowed_sub_pages": list(ALLOWED_SUBPAGES.keys()),
+        "allowed_access_key": list(ALLOWED_ACCESS_KEY.keys())
     })
 
 if __name__ == '__main__':

@@ -12,7 +12,6 @@ DROP TABLE if EXISTS auditoria;
 DROP TABLE if EXISTS stock_outs;
 DROP TABLE if EXISTS stock;
 DROP TABLE if EXISTS pharma;
-DROP TABLE if EXISTS auth;
 DROP TABLE if EXISTS usuario;
 
 -- ---------------------------------------------------------------
@@ -52,16 +51,12 @@ CREATE TABLE if NOT EXISTS stock_outs (
 CREATE TABLE if NOT EXISTS usuario (
 	 id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
+    nome_completo VARCHAR(255),
+    cargo VARCHAR(50) NOT NULL,
     cpf VARCHAR(14) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
 	 ativo TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE if NOT EXISTS auth (
-    id_user INT NOT NULL,
-    permission VARCHAR(100) NOT NULL UNIQUE,
-    FOREIGN KEY (id_user) REFERENCES usuario(id)
 );
 
 CREATE TABLE if NOT EXISTS auditoria (
